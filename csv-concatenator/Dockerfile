@@ -1,7 +1,10 @@
-ARG PYCLOWDER_PYTHON=""
-FROM clowder/pyclowder${PYCLOWDER_PYTHON}:onbuild
+FROM python:3.8
 
 ENV MAIN_SCRIPT="concatenator.py" \
     RABBITMQ_QUEUE=""
 
-ONBUILD COPY extractor_info.json /home/clowder/
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+COPY concatenator.py extractor_info.json ./
+CMD python concatenator.py

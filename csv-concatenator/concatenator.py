@@ -2,13 +2,13 @@
 
 import logging
 import csv
-import io
+import os
 import pandas as pd
 
 from pyclowder.extractors import Extractor
 from pyclowder.utils import CheckMessage
 from pyclowder.datasets import get_file_list
-from pyclowder.files import download, upload_to_dataset
+from pyclowder.files import download, upload_to_dataset, delete
 
 
 class CSVConcatenator(Extractor):
@@ -57,67 +57,77 @@ class CSVConcatenator(Extractor):
 
     def check_message(self, connector, host, secret_key, resource, parameters):
         # Don't download file if there isn't at least one other CSV to concatenate
+        #host = "http://host.docker.internal:8000" # TODO: Remove
 
-        dataset_id = resource["parent_dataset_id"]
+        dataset_id = resource["parent"]["id"]
         file_ext = resource["file_ext"]
+
+        if resource['name'] == self.merged_file + file_ext:
+            connector.message_process(resource, "Filename matches concatenation output; ignoring file.")
+            return CheckMessage.ignore
 
         # Check whether the dataset includes another CSV
         all_files = get_file_list(connector, host, secret_key, dataset_id)
         for f in all_files:
-            fname = f['filename']
-            if fname.endswith(file_ext) and fname != resource['name']:
+            fname = f['name']
+            if fname.endswith(file_ext) and f['id'] != resource['id']:
                 return CheckMessage.download
+        connector.message_process(resource, "No concatenation targets found.")
         return CheckMessage.ignore
 
     def process_message(self, connector, host, secret_key, resource, parameters):
         # Process the file and upload the results
+        #host = "http://host.docker.internal:8000"  # TODO: Remove
 
         inputfile = resource["local_paths"][0]
         dataset_id = resource["parent"]["id"]
         file_ext = resource["file_ext"]
-        merged_output = f"{self.merged_file}{file_ext}"
+        merged_output = self.merged_file + file_ext
 
         # Determine which CSV to append to and whether there are column mappings
         all_files = get_file_list(connector, host, secret_key, dataset_id)
         cols_id = None
         for f in all_files:
-            fname = f['filename']
-            if fname == f"{self.columns_file}{file_ext}":
+            fname = f['name']
+            if fname == self.columns_file + file_ext:
                 cols_id = f['id']
                 break
 
         target_ids = []
         merge_exists = False
         for f in all_files:
-            fname = f['filename']
+            fname = f['name']
             if fname == merged_output:
                 target_ids = [f['id']]
                 merge_exists = True
                 break
-            elif fname.endswith(file_ext):
+            elif fname.endswith(file_ext) and f['id'] != resource['id']:
                 # If we don't find an existing merged file, we will merge all with this extension
                 target_ids.append(f['id'])
 
         if cols_id is not None:
-            self.log_info(resource, f"Loading {self.columns_file}{file_ext}")
+            connector.message_process(resource, "Loading " + self.columns_file + file_ext)
             targ = download(connector, host, secret_key, cols_id, ext=file_ext)
             standard_columns = self.load_standard_columns(targ)
         else:
             # Initialize the standard columns table
-            pass
+            standard_columns = {}
 
         merged = None
         if len(target_ids) > 0:
+            # Load the just-uploaded file data
+            new_data = self.load_tabular_data(inputfile)
+            new_data.rename(columns=standard_columns, inplace=True)
+
             if merge_exists:
                 # Download existing merged file and append new data to the end
-                self.log_info(resource, f"Downloading merged file {target_ids[0]}")
+                connector.message_process(resource, "Downloading merged file %s" % target_ids[0])
                 targ = download(connector, host, secret_key, target_ids[0], ext=file_ext)
                 source_data = self.load_tabular_data(targ)
                 new_data = self.load_tabular_data(inputfile)
 
-                self.log_info(resource, f"Appending new file")
+                connector.message_process(resource, "Appending new file")
                 source_data.rename(columns=standard_columns, inplace=True)
-                new_data.rename(columns=standard_columns, inplace=True)
                 merged = pd.concat([source_data, new_data])
             else:
                 # Iterate through all files with this extension and merge them
@@ -125,13 +135,14 @@ class CSVConcatenator(Extractor):
                 column_sets = {}
 
                 for targ_id in target_ids:
-                    self.log_info(resource, f"Downloading file {targ_id}")
+                    connector.message_process(resource, "Downloading file %s" % targ_id)
                     targ = download(connector, host, secret_key, targ_id, ext=file_ext)
                     source_data = self.load_tabular_data(targ)
 
                     if cols_id is None:
                         # Stash the column names for initializing columns file later
                         columns = sorted(source_data.columns)
+                        exists = None
                         for i in column_sets:
                             if column_sets[i] == columns:
                                 exists = i
@@ -141,25 +152,33 @@ class CSVConcatenator(Extractor):
                     else:
                         # Perform renaming of existing data columns otherwise
                         source_data.rename(columns=standard_columns, inplace=True)
-                        if merged is not None:
-                            merged = pd.concat([merged, source_data])
-                        else:
-                            merged = source_data
+
+                    if merged is not None:
+                        merged = pd.concat([merged, source_data])
+                    else:
+                        merged = source_data
+
+                # Finally, merge the newly uploaded file
+                merged = pd.concat([merged, new_data])
 
             if file_ext == ".tsv":
-                merged.to_csv(merged_output, sep="\t")
+                merged.to_csv(merged_output, sep="\t", index=False)
             elif file_ext == ".xlsx":
-                merged.to_excel(merged_output)
+                merged.to_excel(merged_output, index=False)
             else:
-                merged.to_csv(merged_output)
+                merged.to_csv(merged_output, index=False)
 
             # Finally, upload the newly merged file
             file_id = upload_to_dataset(connector, host, secret_key, dataset_id, merged_output, check_duplicate=False)
             if merge_exists:
-                # v2 can update existing file, but v1 must delete existing file
+                # TODO: v2 can update existing concatenated file instead of doing this delete & replace
                 if file_id != target_ids[0]:
-                    self.log_info(resource, f"Deleting previous version of file: {target_ids[0]}")
-            self.log_info(resource, f"Uploaded {merged_output}: {file_id}")
+                    connector.message_process(resource, "Deleting previous version of file: %s" % target_ids[0])
+                    delete(connector, host, secret_key, target_ids[0])
+            connector.message_process(resource, "Uploaded %s: %s" % (merged_output, file_id))
+
+            # Delete local copies of files in the container
+            os.remove(merged_output)
 
 
 if __name__ == "__main__":
