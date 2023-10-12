@@ -145,7 +145,7 @@ class WordCloudExtractor(Extractor):
         pyclowder.files.upload_preview(connector, host, secret_key, file_id, output_file_path, "application/json",
                                        "spec.json",
                                        visualization_name="word-cloud-extractor",
-                                       visualization_component_id="word-cloud")
+                                       visualization_component_id="vega-spec")
 
 
 
