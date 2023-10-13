@@ -1,0 +1,46 @@
+{
+  "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
+  "name": "ncsa.pdg.asjp.netcdf.preview",
+  "version": "1.0",
+  "description": "Maps of NetCDF Data",
+  "author": "Todd Nicholson <tcnichol@illinois.edu>",
+  "contributors": [
+    "Luigi Marini <lmarini@illinois.edu>"
+  ],
+  "contexts": [
+    {
+    }
+  ],
+  "repository": [
+    {
+      "repType": "git",
+      "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/extractors-geo.git"
+    },
+    {
+      "repType": "docker",
+      "repUrl": "clowder/extractors-geo-netcdf-preview"
+    }
+  ],
+  "process": {
+    "file": [
+      "*/"
+    ]
+  },
+  "external_services": [
+    "geoserver"
+  ],
+  "dependencies": [],
+  "bibtex": [],
+  "parameters": {
+    "schema": {
+      "directory": {
+        "type": "string",
+        "title": "projection"
+      }
+    }
+  },
+  "labels": [
+    "Type/Image",
+    "Domain/Geo"
+  ]
+}
