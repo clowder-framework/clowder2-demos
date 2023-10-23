@@ -31,6 +31,7 @@ class WordCloudExtractor(Extractor):
         logger = logging.getLogger(__name__)
         file_id = resource['id']
         file_path = resource['local_paths'][0]
+        user_params = parameters.get('parameters')
 
         # Initialize a list to store the JSON objects
         json_objects = []
@@ -65,8 +66,8 @@ class WordCloudExtractor(Extractor):
         spec = {
           "$schema": "https://vega.github.io/schema/vega/v5.json",
           "description": "A word cloud visualization depicting Vega research paper abstracts.",
-          "width": 350,
-          "height": 400,
+          "width": user_params['width'],
+          "height": user_params['height'],
           "padding": 0,
           "data": [
             {
@@ -90,7 +91,7 @@ class WordCloudExtractor(Extractor):
                 },
                 {
                   "type": "wordcloud",
-                  "size": [350, 400],
+                  "size": [user_params['width'], user_params['height']],
                   "text": {"field": "text2"},
                   "rotate": {"field": "angle"},
                   "font": "Helvetica Neue, Arial",
