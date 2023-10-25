@@ -1,0 +1,11 @@
+name: netcdf-preview
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - netCDF4
+  - pip
+  - matplotlib
+  - basemap
+  - pip:
+      - pyclowder>=3.0.7

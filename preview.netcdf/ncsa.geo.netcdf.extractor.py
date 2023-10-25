@@ -92,5 +92,7 @@ class GeoNetCDF(Extractor):
 
 
 if __name__ == "__main__":
+    clowder_version = os.environ.get("CLOWDER_VERSION")
+    print(clowder_version, 'is the clowder version')
     extractor = GeoNetCDF()
     extractor.start()
