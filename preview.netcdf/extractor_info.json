@@ -23,7 +23,7 @@
   ],
   "process": {
     "file": [
-      "*/"
+      "application/x-netcdf"
     ]
   },
   "external_services": [

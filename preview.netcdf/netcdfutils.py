@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mpl_toolkits
 from mpl_toolkits.basemap import Basemap
-plt.rcParams['figure.figsize'] = (16.0, 12.0)
+
+plt.rcParams["figure.figsize"] = (16.0, 12.0)
 
 
-def generate_maps_for_file(path_to_file, projection='merc'):
+def generate_maps_for_file(path_to_file, projection="merc"):
     previews_returned = []
 
     ds1 = Dataset(path_to_file)
@@ -19,9 +20,9 @@ def generate_maps_for_file(path_to_file, projection='merc'):
     lon_name = ""
     for variable in variable_names:
         lowercase_variable = str(variable).lower()
-        if 'lat' in lowercase_variable:
+        if "lat" in lowercase_variable:
             lat_name = variable
-        if 'lon' in lowercase_variable:
+        if "lon" in lowercase_variable:
             lon_name = variable
 
     # we now have the variable names, we need
@@ -63,7 +64,7 @@ def generate_maps_for_file(path_to_file, projection='merc'):
                 long_name = current_variable.long_name
         except Exception as e:
             long_name = current_variable.name
-        print('before range')
+        print("before range")
         units = None
         try:
             units = current_variable.units
@@ -75,25 +76,32 @@ def generate_maps_for_file(path_to_file, projection='merc'):
         for i in range(0, len(current_variable_shape_list)):
             if current_variable.shape[i] not in lat_lon_shape_values:
                 not_lat_lon_indices.append(i)
-                print('what does this variable have')
+                print("what does this variable have")
         variable_data = current_variable[:]
         if len(not_lat_lon_indices) == 2:
-            print('it is more than one')
-            print('we need to find the time variable')
+            print("it is more than one")
+            print("we need to find the time variable")
             for index in not_lat_lon_indices:
                 value = current_variable[:][index]
-                print('value')
+                print("value")
         if len(not_lat_lon_indices) == 1:
             non_matching_shape_size = current_variable.shape[not_lat_lon_indices[0]]
             quarter_time = int(np.floor(non_matching_shape_size / 4))
             # with time series data, we will show quarterly previews
 
-            for i in range(0,4):
-                current_time_to_plot = int(np.floor(i*quarter_time))
+            for i in range(0, 4):
+                current_time_to_plot = int(np.floor(i * quarter_time))
                 current_time_variable_data = variable_data[current_time_to_plot]
-                print('plot this')
-                m2 = Basemap(projection=projection, llcrnrlat=-80, urcrnrlat=80,
-                             llcrnrlon=-180, urcrnrlon=180, lat_ts=20, resolution='c')
+                print("plot this")
+                m2 = Basemap(
+                    projection=projection,
+                    llcrnrlat=-80,
+                    urcrnrlat=80,
+                    llcrnrlon=-180,
+                    urcrnrlon=180,
+                    lat_ts=20,
+                    resolution="c",
+                )
                 # if we need to use a meshgrid for 1 dimensional lat and lon
                 if use_meshgrid:
                     gridlons, gridlats = np.meshgrid(lons, lats)
@@ -109,24 +117,33 @@ def generate_maps_for_file(path_to_file, projection='merc'):
                 cs2 = m2.pcolor(xi, yi, squeezed_data)
                 m2.drawcoastlines()
                 m2.drawcountries()
-                m2.drawparallels(np.arange(-90., 91., 30.))
-                m2.drawmeridians(np.arange(-180., 181., 60.))
+                m2.drawparallels(np.arange(-90.0, 91.0, 30.0))
+                m2.drawmeridians(np.arange(-180.0, 181.0, 60.0))
                 cbar = m2.colorbar()
                 cbar.solids.set_edgecolor("face")
-                cbar.set_ticks([min,max])
+                cbar.set_ticks([min, max])
                 title = long_name
                 if units:
-                    title = title + '('+str(units)+')'
-                plt.title(title , fontdict={'fontsize': 26})
+                    title = title + "(" + str(units) + ")"
+                plt.title(title, fontdict={"fontsize": 26})
 
-                plot_name = long_name + str(i) + '_' + str(non_matching_shape_size) + '.png'
+                plot_name = (
+                    long_name + str(i) + "_" + str(non_matching_shape_size) + ".png"
+                )
                 plt.savefig(plot_name)
                 previews_returned.append(plot_name)
                 plt.clf()
         # if it is NOT time series data
         if len(not_lat_lon_indices) == 0:
-            m2 = Basemap(projection='merc', llcrnrlat=-80, urcrnrlat=80,
-                         llcrnrlon=-180, urcrnrlon=180, lat_ts=20, resolution='c')
+            m2 = Basemap(
+                projection="merc",
+                llcrnrlat=-80,
+                urcrnrlat=80,
+                llcrnrlon=-180,
+                urcrnrlon=180,
+                lat_ts=20,
+                resolution="c",
+            )
             # if we need to use a meshgrid for 1 dimensional lat and lon
             if use_meshgrid:
                 gridlons, gridlats = np.meshgrid(lons, lats)
@@ -141,12 +158,12 @@ def generate_maps_for_file(path_to_file, projection='merc'):
             cs2 = m2.pcolor(xi, yi, squeezed_data)
             m2.drawcoastlines()
             m2.drawcountries()
-            m2.drawparallels(np.arange(-90., 91., 30.))
-            m2.drawmeridians(np.arange(-180., 181., 60.))
+            m2.drawparallels(np.arange(-90.0, 91.0, 30.0))
+            m2.drawmeridians(np.arange(-180.0, 181.0, 60.0))
             cbar = m2.colorbar()
             cbar.solids.set_edgecolor("face")
             cbar.set_ticks([min, max])
-            plot_name = long_name + '.png'
+            plot_name = long_name + ".png"
             plt.savefig(plot_name)
             previews_returned.append(plot_name)
             plt.clf()
