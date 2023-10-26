@@ -3,8 +3,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - netCDF4
   - pip
+  - netCDF4
+  - pyproj
   - matplotlib
   - basemap
   - pip:
