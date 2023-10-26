@@ -1,10 +1,6 @@
-import os
-import netCDF4 as nc
-import sys
 from netCDF4 import Dataset as Dataset
 import matplotlib.pyplot as plt
 import numpy as np
-import mpl_toolkits
 from mpl_toolkits.basemap import Basemap
 
 plt.rcParams["figure.figsize"] = (16.0, 12.0)

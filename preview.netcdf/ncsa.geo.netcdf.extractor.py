@@ -3,20 +3,13 @@
 """Example extractor based on the clowder code."""
 
 import logging
-import subprocess
 import json
 import pyclowder
 from pyclowder.extractors import Extractor
 import pyclowder.files
 import os
-import netCDF4 as nc
-import sys
-from netCDF4 import Dataset as Dataset
 import matplotlib.pyplot as plt
-import numpy as np
-import mpl_toolkits
 import netcdfutils
-from mpl_toolkits.basemap import Basemap
 
 plt.rcParams["figure.figsize"] = (16.0, 12.0)
 
@@ -93,6 +86,6 @@ class GeoNetCDF(Extractor):
 
 if __name__ == "__main__":
     clowder_version = os.environ.get("CLOWDER_VERSION")
-    print(clowder_version, 'is the clowder version')
+    print(clowder_version, "is the clowder version")
     extractor = GeoNetCDF()
     extractor.start()
