@@ -11,10 +11,10 @@ If the data is a time series, it will generate 4 previews spaced evenly througho
 
 
 ## Build a docker image
-      docker build -t clowder/ncsa-netcdf-extractor:latest .
+      docker build -t ncsa-netcdf-extractor:latest .
 
 ## Test the docker container image:
-      docker run --name=ncsa-netcdf-extractor -d --restart=always -e 'RABBITMQ_URI=amqp://user1:pass1@rabbitmq.ncsa.illinois.edu:5672/clowder-dev' -e 'RABBITMQ_EXCHANGE=clowder' -e 'TZ=/usr/share/zoneinfo/US/Central' -e 'REGISTRATION_ENDPOINTS=http://dts-dev.ncsa.illinois.edu:9000/api/extractors?key=key1' clowder/ncsa-netcdf-extractor
+      docker run -t -i --rm --net clowder_clowder -e "RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/%2f" --name "ncsa-netcdf-extractor" ncsa-netcdf-extractor
 
 ## To run without docker
 
