@@ -36,6 +36,9 @@ jobs:
           - name: word-cloud-extractor
             FOLDER: word-cloud-extractor
             PLATFORM: "linux/amd64,linux/arm64"
+          - name: ncsa.pdg.asjp.netcdf.preview
+            FOLDER: preview.netcdf
+            PLATFORM: "linux/amd64,linux/arm64"
 
     steps:
       - uses: actions/checkout@v2
