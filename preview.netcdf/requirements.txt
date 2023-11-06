@@ -1,0 +1,7 @@
+gsconfig-py3==1.0.8
+pika>=1.0.0
+requests>=2.10.0
+wheel>=0.24.0
+pyclowder>=3.0.7
+netCDF4
+matplotlib
