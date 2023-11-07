@@ -11,6 +11,11 @@ from pyclowder.datasets import get_file_list
 from pyclowder.files import download, upload_to_dataset, delete
 
 
+# TODO: Provide regex rules for which outputs go where
+# TODO: concatenation_rules.csv that has the regex mappings
+# TODO: Dataset-level extractor, manually submit extractions only (by default)
+# TODO: Add a ColumnName column that lets them explicitly change canonical name
+
 class CSVConcatenator(Extractor):
     """Create and upload image thumbnail and image preview."""
 
