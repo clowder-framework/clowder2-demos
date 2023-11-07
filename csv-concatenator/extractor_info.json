@@ -1,0 +1,27 @@
+{
+  "@context": "https://clowderframework.org/contexts/extractors.jsonld",
+  "name": "ncsa.csv.concatenator",
+  "version": "1.0.0",
+  "description": "Automatically concatenate tabular data into an ongoing merged file.",
+  "author": "Max Burnette <mburnet2@illinois.edu>",
+  "contexts": [],
+  "repository": ["https://github.com/clowder-framework/clowder2-demos"],
+  "external_services": [],
+  "process": {
+    "file": [
+      "text/*",
+      "application/excel",
+      "application/vnd_ms-excel",
+      "application/vnd_ms-excel_sheet_macroEnabled_12",
+      "application/vnd_ms-excel_addin_macroEnabled_12",
+      "application/vnd_ms-excel_sheet_binary_macroEnabled_12"
+    ]
+  },
+  "dependencies": [],
+  "bibtex": [
+    ""
+  ],
+  "labels": [
+    "Type/Text"
+  ]
+}
