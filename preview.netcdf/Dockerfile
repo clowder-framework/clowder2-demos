@@ -27,6 +27,8 @@ RUN mamba env create -f environment.yml
 
 SHELL ["conda", "run", "-n", "netcdf-preview", "/bin/bash", "-c"]
 
+RUN python -m pip install pyclowder
+
 ENV CLOWDER_VERSION=2
 
 CMD ["conda", "run", "--no-capture-output", "-n", "netcdf-preview", "python","-u", "/ncsa.geo.netcdf.extractor.py"]
